@@ -1,0 +1,24 @@
+  
+ 04. Mongo与Protobuf使用
+基本需求:创建玩家信息存储结构、使用礼品码 请基于【03题 Redis使用】修改或开发新接口:
+(1)【客户端调用, http】新增注册与登录接口:客户端传递唯一识别码(一个任意字 符串)至服务器，服务器通过该识别码判断是否存在该玩家:不存在则注册新用户 ，生成唯一UID;存在则返回用户登陆数据(唯一UID、金币数、钻石数玩)家。信息 储存在mongo数据库中
+(2)【客户端调用, http】验证礼品码接口修改:按照管理员所添加的金币与钻石奖 励数目，发放奖励存储至数据库。编译protobuf文件，将返回信息封装为protobuf 对象以 []byte 作为接口返回值返回给客户端。客户端接收到的是二进制序列，可 以编写单测函数通过protobuf的decode方法解析，自测内容正确性。
+说明:
+(1)UID可以为递增数或随机数，但需要保证唯一性 (2)返回结构GeneraReward已经定义:增加量存在change中，余额存在balance 中返回，具体见附件
+工程要求:
+1)接口文档，主要逻辑的流程图 2)代码结构拆分，逻辑分层，方便后续扩展 3)需要处理错误等各种异常情况 4)单元测试 5)使用locust进行压力测试，有压测报告
+考核点:接口文档，流程图，代码结构(拆分mvc)，基本服务器框架，错误处理， mongo，protobuf，单元测试，压力测试
+附:protobuf定义文件
+
+    syntax = "proto3"; package response;
+// 通用奖励消息
+message GeneralReward {
+int32 code = 1;
+string msg = 2;
+map<uint32, uint64> changes = 3; // 客户端展示奖励的部分 : 道具ID ->
+道具数量
+map<uint32, uint64> balance = 4; // 道具有变化部分的当前余额 : 道具
+ID -> 道具数量
+map<uint32, uint64> counter = 5; // 计数器当前值 : counterType -> 计
+数
+string ext = 6; // 扩展字段，IAP使用 }
